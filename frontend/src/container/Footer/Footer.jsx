@@ -4,35 +4,77 @@ import { images } from '../../constants';
 import { AppWrap, MotionWrap } from '../../wrapper';
 import CircularProgress from '@mui/material/CircularProgress';
 import './Footer.scss';
+import * as Yup from 'yup';
+import { useFormik } from 'formik';
+import { TextField } from '@mui/material';
+import { makeStyles } from "@mui/styles";
 
 const Footer = () => {
-  const [formData, setFormData] = useState({ from_name: '', reply_to: '', message: '' });
+  // const [formData, setFormData] = useState({ from_name: '', reply_to: '', message: '' });
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { username, email, message } = formData;
+  // const { username, email, message } = formData;
 
-  const handleChangeInput = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const formik = useFormik({
+    initialValues: {
+      from_name: '',
+      reply_to: '',
+      message: ''
+    },
+    validationSchema: Yup.object().shape({
+      from_name: Yup.string().max(25).required('Name is required'),
+      reply_to: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+      message: Yup.string().max(500).required('Message should not be empty')
+    }),
+    onSubmit: (values) => {
+      setLoading(true);
+      send(
+        'service_g3wl7pb',
+        'template_oy6pw24',
+        values,
+        'WGjhTCU-N1OyWcfGJ'
+      )
+      .then((response) => {
+        console.log('SUCCESS!', response.status, response.text);
+        setIsFormSubmitted(true);
+      })
+      .catch((err) => {
+        console.log('FAILED...', err);
+        formik.setSubmitting(false);
+      });
+    }
+  })
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    send(
-      'service_g3wl7pb',
-      'template_oy6pw24',
-      formData,
-      'WGjhTCU-N1OyWcfGJ'
-    )
-    .then((response) => {
-      console.log('SUCCESS!', response.status, response.text);
-      setIsFormSubmitted(true);
-    })
-    .catch((err) => {
-      console.log('FAILED...', err);
-    });
-  };
+  const useStyles = makeStyles({
+    noBorder: {
+      border: "none",
+    },
+  });
+
+  const classes = useStyles();
+
+  // const handleChangeInput = (e) => {
+  //   setFormData({ ...formData, [e.target.name]: e.target.value });
+  // };
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   send(
+  //     'service_g3wl7pb',
+  //     'template_oy6pw24',
+  //     formData,
+  //     'WGjhTCU-N1OyWcfGJ'
+  //   )
+  //   .then((response) => {
+  //     console.log('SUCCESS!', response.status, response.text);
+  //     setIsFormSubmitted(true);
+  //   })
+  //   .catch((err) => {
+  //     console.log('FAILED...', err);
+  //   });
+  // };
 
   return (
     <>
@@ -50,50 +92,65 @@ const Footer = () => {
       </div>
       {!isFormSubmitted ? (
         <div className="app__footer-form app__flex">
-          <div className="app__flex">
-            <input 
+          <form className='width-100' onSubmit={formik.handleSubmit}>
+            <div className="app__flex">
+              <TextField 
+                className="p-text"
+                type="text"
+                placeholder="Your Name"
+                fullWidth
+                name="from_name"
+                value={formik.values.from_name}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                error={Boolean(formik.touched.from_name && formik.errors.from_name)}
+                helperText={formik.touched.from_name && formik.errors.from_name}
+              />
+            </div>
+            <div className="app__flex">
+              <TextField
+                className="p-text"
+                fullWidth
+                type="email"
+                placeholder="Your Email"
+                name="reply_to" 
+                value={formik.values.reply_to}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                error={Boolean(formik.touched.reply_to && formik.errors.reply_to)}
+                helperText={formik.touched.reply_to && formik.errors.reply_to}
+              />
+            </div>
+            <div>
+              <TextField
+                className="p-text"
+                placeholder="Your Message"
+                value={formik.values.message}
+                name="message"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                classes={{notchedOutline:classes.input}}
+                InputProps={{ classes:{notchedOutline:classes.noBorder} }}
+                error={Boolean(formik.touched.message && formik.errors.message)}
+                helperText={formik.touched.message && formik.errors.message}
+              />
+            </div>
+            <button
               className="p-text"
-              type="text"
-              placeholder="Your Name"
-              name="from_name"
-              value={username}
-              onChange={handleChangeInput}
-            />
-          </div>
-          <div className="app__flex">
-            <input
-              className="p-text"
-              type="email"
-              placeholder="Your Email"
-              name="reply_to" 
-              value={email}
-              onChange={handleChangeInput}
-            />
-          </div>
-          <div>
-            <textarea
-              className="p-text"
-              placeholder="Your Message"
-              value={message}
-              name="message"
-              onChange={handleChangeInput}
-            />
-          </div>
-          <button
-            type="button" 
-            className="p-text" 
-            onClick={handleSubmit}
-          >
-            {
-              !loading
-              ?
-                'Send Message'
-              : 
-              <span>
-                {<><CircularProgress size={15} sx={{ marginRight: .5 }}/> <p>Sending...</p></>} 
-              </span>
-            }
-          </button>
+              type="submit"
+              disabled={formik.isSubmitting}
+            >
+              {
+                !loading
+                ?
+                  'Send Message'
+                : 
+                <span>
+                  {<><CircularProgress size={15} sx={{ marginRight: .5 }}/> <p>Sending...</p></>} 
+                </span>
+              }
+            </button>
+          </form>
         </div>
       ) : (
         <div>
