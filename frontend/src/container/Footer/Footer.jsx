@@ -98,7 +98,8 @@ const Footer = () => {
                 className="p-text"
                 type="text"
                 placeholder="Your Name"
-                fullWidth
+                variant="standard"
+                InputProps={{ disableUnderline: true }}
                 name="from_name"
                 value={formik.values.from_name}
                 onBlur={formik.handleBlur}
@@ -110,13 +111,14 @@ const Footer = () => {
             <div className="app__flex">
               <TextField
                 className="p-text"
-                fullWidth
                 type="email"
                 placeholder="Your Email"
                 name="reply_to" 
                 value={formik.values.reply_to}
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
+                InputProps={{ disableUnderline: true }}
+                variant="standard"
                 error={Boolean(formik.touched.reply_to && formik.errors.reply_to)}
                 helperText={formik.touched.reply_to && formik.errors.reply_to}
               />
@@ -129,8 +131,8 @@ const Footer = () => {
                 name="message"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                classes={{notchedOutline:classes.input}}
-                InputProps={{ classes:{notchedOutline:classes.noBorder} }}
+                variant="standard"
+                InputProps={{ disableUnderline: true }}
                 error={Boolean(formik.touched.message && formik.errors.message)}
                 helperText={formik.touched.message && formik.errors.message}
               />
